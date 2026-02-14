@@ -20,6 +20,7 @@ pub fn main(init: std.process.Init) !void {
 
     var j: usize = 0;
     while (j < image_height) : (j += 1) {
+        std.debug.print("Scanlines remaining: {}\n", .{image_height - j});
         var i: usize = 0;
         while (i < image_width) : (i += 1) {
             const r = @as(f64, @floatFromInt(i)) / @as(f64, @floatFromInt(image_width - 1));
@@ -38,4 +39,5 @@ pub fn main(init: std.process.Init) !void {
     }
 
     try writer.flush();
+    std.debug.print("Done\n", .{});
 }
