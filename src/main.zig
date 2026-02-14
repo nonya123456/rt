@@ -1,6 +1,10 @@
 const std = @import("std");
 
+const Ray = @import("Ray.zig");
+
 pub fn main(init: std.process.Init) !void {
+    _ = Ray{ .origin = .{ 0, 0, 0 }, .dir = .{ 0, 0, 0 } };
+
     const image_width = 256;
     const image_height = 256;
 
