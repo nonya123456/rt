@@ -25,19 +25,21 @@ pub fn main(init: std.process.Init) !void {
         while (i < image_width) : (i += 1) {
             const r = @as(f64, @floatFromInt(i)) / @as(f64, @floatFromInt(image_width - 1));
             const g = @as(f64, @floatFromInt(j)) / @as(f64, @floatFromInt(image_height - 1));
-            const b: f64 = 0.0;
-
-            const ir: i32 = @intFromFloat(255.999 * r);
-            const ig: i32 = @intFromFloat(255.999 * g);
-            const ib: i32 = @intFromFloat(255.999 * b);
-
-            const line = try std.fmt.allocPrint(init.gpa, "{} {} {}\n", .{ ir, ig, ib });
-            defer init.gpa.free(line);
-
-            try writer.writeAll(line);
+            try writeColor(init.gpa, writer, .{ r, g, 0.0 });
         }
     }
 
     try writer.flush();
     std.debug.print("Done\n", .{});
+}
+
+fn writeColor(gpa: std.mem.Allocator, writer: *std.Io.Writer, color: @Vector(3, f64)) !void {
+    const ir: i32 = @intFromFloat(255.999 * color[0]);
+    const ig: i32 = @intFromFloat(255.999 * color[1]);
+    const ib: i32 = @intFromFloat(255.999 * color[2]);
+
+    const line = try std.fmt.allocPrint(gpa, "{} {} {}\n", .{ ir, ig, ib });
+    defer gpa.free(line);
+
+    try writer.writeAll(line);
 }
