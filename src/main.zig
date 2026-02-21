@@ -61,14 +61,14 @@ pub fn main(init: std.process.Init) !void {
 
 fn hitSphere(center: Vec3, radius: f32, r: Ray) f32 {
     const oc = center.sub(r.origin);
-    const a = r.dir.dot(r.dir);
-    const b = -2.0 * r.dir.dot(oc);
-    const c = oc.dot(oc) - radius * radius;
-    const discriminant = b * b - 4.0 * a * c;
+    const a = r.dir.length_squared();
+    const h = r.dir.dot(oc);
+    const c = oc.length_squared() - radius * radius;
+    const discriminant = h * h - a * c;
     if (discriminant < 0) {
         return -1.0;
     }
-    return (-b - @sqrt(discriminant)) / (2.0 * a);
+    return (h - @sqrt(discriminant)) / a;
 }
 
 fn rayColor(r: Ray) Vec3 {

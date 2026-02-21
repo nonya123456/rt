@@ -35,12 +35,15 @@ pub fn dot(self: Vec3, v: Vec3) f32 {
     return m[0] + m[1] + m[2];
 }
 
-pub fn magnitude(self: Vec3) f32 {
-    const d = self.dot(self);
-    return @sqrt(d);
+pub fn length_squared(self: Vec3) f32 {
+    return self.dot(self);
+}
+
+pub fn length(self: Vec3) f32 {
+    return @sqrt(self.length_squared());
 }
 
 pub fn normalized(self: Vec3) Vec3 {
-    const m: Vec3 = .splat(self.magnitude());
+    const m: Vec3 = .splat(self.length());
     return .{ .data = self.data / m.data };
 }
