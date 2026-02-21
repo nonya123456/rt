@@ -2,6 +2,7 @@ const std = @import("std");
 
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
+const Sphere = @import("Sphere.zig");
 
 pub fn main(init: std.process.Init) !void {
     const aspect_ratio = 16.0 / 9.0;
