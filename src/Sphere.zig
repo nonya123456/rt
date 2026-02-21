@@ -38,10 +38,13 @@ fn hitOpaque(ptr: *anyopaque, r: Ray, ray_tmin: f32, ray_tmax: f32) ?HitRecord {
 
     const t = root;
     const p = r.at(t);
-    const normal = p.sub(self.center).div(.splat(self.radius));
+    const outward_normal = p.sub(self.center).div(.splat(self.radius));
+    const front_face = r.dir.dot(outward_normal) < 0;
+    const normal = if (front_face) outward_normal else outward_normal.neg();
     return .{
         .p = p,
         .normal = normal,
         .t = t,
+        .front_face = front_face,
     };
 }

@@ -30,6 +30,10 @@ pub fn div(self: Vec3, v: Vec3) Vec3 {
     return .{ .data = self.data / v.data };
 }
 
+pub fn neg(self: Vec3) Vec3 {
+    return Vec3.splat(0).sub(self);
+}
+
 pub fn dot(self: Vec3, v: Vec3) f32 {
     const m = self.data * v.data;
     return m[0] + m[1] + m[2];
