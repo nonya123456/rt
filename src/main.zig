@@ -1,14 +1,31 @@
 const std = @import("std");
 
-const Ray = @import("Ray.zig");
-const Vec3 = @import("Vec3.zig");
-const Sphere = @import("Sphere.zig");
+const Hittable = @import("hittable.zig").Hittable;
 const HittableList = @import("HittableList.zig");
+const Ray = @import("Ray.zig");
+const Sphere = @import("Sphere.zig");
+const Vec3 = @import("Vec3.zig");
 
 pub fn main(init: std.process.Init) !void {
     const aspect_ratio = 16.0 / 9.0;
     const image_width: i32 = 400;
     const image_height: i32 = @intFromFloat(@as(f32, @floatFromInt(image_width)) / aspect_ratio);
+
+    var world: HittableList = .init();
+
+    var sphere1: Sphere = .{
+        .center = .init(.{ 0, 0, -1 }),
+        .radius = 0.5,
+    };
+    try world.add(init.arena.allocator(), sphere1.hittable());
+
+    var sphere2: Sphere = .{
+        .center = .init(.{ 0, -100.5, -1 }),
+        .radius = 100,
+    };
+    try world.add(init.arena.allocator(), sphere2.hittable());
+
+    const world_hittable = world.hittable();
 
     const focal_length = 1.0;
     const viewport_height = 2.0;
@@ -52,7 +69,7 @@ pub fn main(init: std.process.Init) !void {
                 .add(pixel_delta_v.mul(.splatInt(j)));
             const ray_direction = pixel_center.sub(camera_center);
             const r: Ray = .{ .origin = camera_center, .dir = ray_direction };
-            const color = rayColor(r);
+            const color = rayColor(r, world_hittable);
             try writeColor(init.gpa, writer, color);
         }
     }
@@ -61,27 +78,13 @@ pub fn main(init: std.process.Init) !void {
     std.debug.print("Done\n", .{});
 }
 
-fn hitSphere(center: Vec3, radius: f32, r: Ray) f32 {
-    const oc = center.sub(r.origin);
-    const a = r.dir.length_squared();
-    const h = r.dir.dot(oc);
-    const c = oc.length_squared() - radius * radius;
-    const discriminant = h * h - a * c;
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    return (h - @sqrt(discriminant)) / a;
-}
-
-fn rayColor(r: Ray) Vec3 {
-    const t = hitSphere(.init(.{ 0, 0, -1 }), 0.5, r);
-    if (t > 0) {
-        const n = r.at(t).sub(.init(.{ 0, 0, -1 })).normalized();
-        return n.add(.splat(1.0)).mul(.splat(0.5));
-    }
-    const unit_direction = r.dir.normalized();
-    const a = 0.5 * (unit_direction.data[1] + 1.0);
-    return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
+fn rayColor(r: Ray, h: Hittable) Vec3 {
+    const rec = h.hit(r, 0, std.math.floatMax(f32)) orelse {
+        const unit_direction = r.dir.normalized();
+        const a = 0.5 * (unit_direction.data[1] + 1.0);
+        return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
+    };
+    return rec.normal.add(.splat(1.0)).mul(.splat(0.5));
 }
 
 fn writeColor(gpa: std.mem.Allocator, writer: *std.Io.Writer, color: Vec3) !void {
