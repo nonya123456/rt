@@ -1,3 +1,4 @@
+const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
 
@@ -10,9 +11,9 @@ pub const HitRecord = struct {
 
 pub const Hittable = struct {
     ptr: *anyopaque,
-    hitOpaque: *const fn (ptr: *anyopaque, r: Ray, ray_tmin: f32, ray_tmax: f32) ?HitRecord,
+    hitOpaque: *const fn (ptr: *anyopaque, r: Ray, ray_t: Interval) ?HitRecord,
 
-    pub fn hit(self: Hittable, r: Ray, ray_tmin: f32, ray_tmax: f32) ?HitRecord {
-        return self.hitOpaque(self.ptr, r, ray_tmin, ray_tmax);
+    pub fn hit(self: Hittable, r: Ray, ray_t: Interval) ?HitRecord {
+        return self.hitOpaque(self.ptr, r, ray_t);
     }
 };

@@ -1,5 +1,6 @@
 const HitRecord = @import("hittable.zig").HitRecord;
 const Hittable = @import("hittable.zig").Hittable;
+const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
 
@@ -15,7 +16,7 @@ pub fn hittable(self: *Sphere) Hittable {
     };
 }
 
-fn hitOpaque(ptr: *anyopaque, r: Ray, ray_tmin: f32, ray_tmax: f32) ?HitRecord {
+fn hitOpaque(ptr: *anyopaque, r: Ray, ray_t: Interval) ?HitRecord {
     const self: *Sphere = @ptrCast(@alignCast(ptr));
 
     const oc = self.center.sub(r.origin);
@@ -29,9 +30,9 @@ fn hitOpaque(ptr: *anyopaque, r: Ray, ray_tmin: f32, ray_tmax: f32) ?HitRecord {
 
     const sqrtd = @sqrt(discriminant);
     var root = (h - sqrtd) / a;
-    if (root <= ray_tmin or ray_tmax <= root) {
+    if (!ray_t.surrounds(root)) {
         root = (h + sqrtd) / a;
-        if (root <= ray_tmin or ray_tmax <= root) {
+        if (!ray_t.surrounds(root)) {
             return null;
         }
     }

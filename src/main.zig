@@ -2,6 +2,7 @@ const std = @import("std");
 
 const Hittable = @import("hittable.zig").Hittable;
 const HittableList = @import("HittableList.zig");
+const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Sphere = @import("Sphere.zig");
 const Vec3 = @import("Vec3.zig");
@@ -79,7 +80,7 @@ pub fn main(init: std.process.Init) !void {
 }
 
 fn rayColor(r: Ray, h: Hittable) Vec3 {
-    const rec = h.hit(r, 0, std.math.floatMax(f32)) orelse {
+    const rec = h.hit(r, .{ .min = 0, .max = std.math.floatMax(f32) }) orelse {
         const unit_direction = r.dir.normalized();
         const a = 0.5 * (unit_direction.data[1] + 1.0);
         return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
