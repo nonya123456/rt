@@ -59,17 +59,23 @@ pub fn main(init: std.process.Init) !void {
     std.debug.print("Done\n", .{});
 }
 
-fn hitSphere(center: Vec3, radius: f32, r: Ray) bool {
+fn hitSphere(center: Vec3, radius: f32, r: Ray) f32 {
     const oc = center.sub(r.origin);
     const a = r.dir.dot(r.dir);
     const b = -2.0 * r.dir.dot(oc);
     const c = oc.dot(oc) - radius * radius;
-    return b * b - 4.0 * a * c >= 0;
+    const discriminant = b * b - 4.0 * a * c;
+    if (discriminant < 0) {
+        return -1.0;
+    }
+    return (-b - @sqrt(discriminant)) / (2.0 * a);
 }
 
 fn rayColor(r: Ray) Vec3 {
-    if (hitSphere(.init(.{ 0, 0, -1 }), 0.5, r)) {
-        return .init(.{ 1, 0, 0 });
+    const t = hitSphere(.init(.{ 0, 0, -1 }), 0.5, r);
+    if (t > 0) {
+        const n = r.at(t).sub(.init(.{ 0, 0, -1 })).normalized();
+        return n.add(.splat(1.0)).mul(.splat(0.5));
     }
     const unit_direction = r.dir.normalized();
     const a = 0.5 * (unit_direction.data[1] + 1.0);
