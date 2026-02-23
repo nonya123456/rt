@@ -68,7 +68,7 @@ pub fn main(init: std.process.Init) !void {
             const pixel_center = pixel00_loc
                 .add(pixel_delta_u.mul(.splatInt(i)))
                 .add(pixel_delta_v.mul(.splatInt(j)));
-            const ray_direction = pixel_center.sub(camera_center);
+            const ray_direction = pixel_center.sub(camera_center).normalized();
             const r: Ray = .{ .origin = camera_center, .dir = ray_direction };
             const color = rayColor(r, world_hittable);
             try writeColor(writer, color);
