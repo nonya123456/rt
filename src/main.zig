@@ -71,7 +71,7 @@ pub fn main(init: std.process.Init) !void {
             const ray_direction = pixel_center.sub(camera_center);
             const r: Ray = .{ .origin = camera_center, .dir = ray_direction };
             const color = rayColor(r, world_hittable);
-            try writeColor(init.gpa, writer, color);
+            try writeColor(writer, color);
         }
     }
 
@@ -88,13 +88,9 @@ fn rayColor(r: Ray, h: Hittable) Vec3 {
     return rec.normal.add(.splat(1.0)).mul(.splat(0.5));
 }
 
-fn writeColor(gpa: std.mem.Allocator, writer: *std.Io.Writer, color: Vec3) !void {
+fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
     const ir: i32 = @intFromFloat(255.999 * color.data[0]);
     const ig: i32 = @intFromFloat(255.999 * color.data[1]);
     const ib: i32 = @intFromFloat(255.999 * color.data[2]);
-
-    const line = try std.fmt.allocPrint(gpa, "{} {} {}\n", .{ ir, ig, ib });
-    defer gpa.free(line);
-
-    try writer.writeAll(line);
+    try writer.print("{} {} {}\n", .{ ir, ig, ib });
 }
