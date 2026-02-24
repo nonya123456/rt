@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const Hittable = @import("hittable.zig").Hittable;
+const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
 
@@ -76,8 +77,9 @@ fn rayColor(r: Ray, h: Hittable) Vec3 {
 }
 
 fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
-    const ir: i32 = @intFromFloat(255.999 * color.data[0]);
-    const ig: i32 = @intFromFloat(255.999 * color.data[1]);
-    const ib: i32 = @intFromFloat(255.999 * color.data[2]);
+    const intensity: Interval = .{ .min = 0, .max = 0.999 };
+    const ir: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[0]));
+    const ig: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[1]));
+    const ib: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[2]));
     try writer.print("{} {} {}\n", .{ ir, ig, ib });
 }
