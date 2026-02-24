@@ -26,8 +26,11 @@ pub fn main(init: std.process.Init) !void {
     var file_writer = file.writer(init.io, &buf);
     const writer = &file_writer.interface;
 
+    var prng: std.Random.DefaultPrng = .init(0);
+    const rng = prng.random();
+
     const aspect_ratio = 16.0 / 9.0;
     const image_width: i32 = 400;
-    const camera: Camera = .init(aspect_ratio, image_width, .splat(0));
+    const camera: Camera = .init(rng, aspect_ratio, image_width, .splat(0), 100);
     try camera.render(writer, world_hittable);
 }
