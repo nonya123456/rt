@@ -8,13 +8,13 @@ max: f32,
 pub fn empty() Interval {
     return .{
         .min = std.math.floatMax(f32),
-        .max = std.math.floatMin(f32),
+        .max = -std.math.floatMax(f32),
     };
 }
 
 pub fn universe() Interval {
     return .{
-        .min = std.math.floatMin(f32),
+        .min = -std.math.floatMax(f32),
         .max = std.math.floatMax(f32),
     };
 }
