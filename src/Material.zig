@@ -4,7 +4,7 @@ const Vec3 = @import("Vec3.zig");
 
 const Material = @This();
 
-const ScatterResult = struct {
+pub const ScatterResult = struct {
     attenuation: Vec3,
     scattered: Ray,
 };

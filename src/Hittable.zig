@@ -1,4 +1,5 @@
 const Interval = @import("Interval.zig");
+const Material = @import("Material.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
 
@@ -9,6 +10,7 @@ pub const HitRecord = struct {
     normal: Vec3,
     t: f32,
     front_face: bool,
+    mat: Material,
 };
 
 ptr: *anyopaque,

@@ -1,14 +1,15 @@
 const Hittable = @import("Hittable.zig");
 const HitRecord = Hittable.HitRecord;
 const Interval = @import("Interval.zig");
+const Material = @import("Material.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
-const Material = @import("Material.zig");
 
 const Sphere = @This();
 
 center: Vec3,
 radius: f32,
+mat: Material,
 
 pub fn hittable(self: *Sphere) Hittable {
     return .{
@@ -48,5 +49,6 @@ fn hitOpaque(ptr: *anyopaque, r: Ray, ray_t: Interval) ?HitRecord {
         .normal = normal,
         .t = t,
         .front_face = front_face,
+        .mat = self.mat,
     };
 }

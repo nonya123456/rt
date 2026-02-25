@@ -79,3 +79,12 @@ pub fn normalized(self: Vec3) Vec3 {
     const m: Vec3 = .splat(self.length());
     return .{ .data = self.data / m.data };
 }
+
+pub fn nearZero(self: Vec3) bool {
+    const s = 1e-8;
+    return @abs(self.data[0]) < s and @abs(self.data[1]) < s and @abs(self.data[2]) < s;
+}
+
+pub fn reflect(self: Vec3, n: Vec3) Vec3 {
+    return self.sub(Vec3.splat(2.0).mul(.splat(self.dot(n))).mul(n));
+}

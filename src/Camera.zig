@@ -110,9 +110,10 @@ fn rayColor(rng: std.Random, r: Ray, h: Hittable, depth: i32) Vec3 {
         return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
     };
 
-    const dir: Vec3 = rec.normal.add(.randomUnit(rng));
-    const new_ray: Ray = .{ .origin = rec.p, .dir = dir };
-    return rayColor(rng, new_ray, h, depth - 1).mul(.splat(0.5));
+    const res = rec.mat.scatter(r, rec) orelse {
+        return .splat(0);
+    };
+    return rayColor(rng, res.scattered, h, depth - 1).mul(res.attenuation);
 }
 
 fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
