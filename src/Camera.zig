@@ -117,8 +117,20 @@ fn rayColor(rng: std.Random, r: Ray, h: Hittable, depth: i32) Vec3 {
 
 fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
     const intensity: Interval = .{ .min = 0, .max = 0.999 };
-    const ir: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[0]));
-    const ig: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[1]));
-    const ib: i32 = @intFromFloat(256.0 * intensity.clamp(color.data[2]));
+
+    const r = linearToGamma(color.data[0]);
+    const g = linearToGamma(color.data[1]);
+    const b = linearToGamma(color.data[2]);
+
+    const ir: i32 = @intFromFloat(256.0 * intensity.clamp(r));
+    const ig: i32 = @intFromFloat(256.0 * intensity.clamp(g));
+    const ib: i32 = @intFromFloat(256.0 * intensity.clamp(b));
     try writer.print("{} {} {}\n", .{ ir, ig, ib });
+}
+
+fn linearToGamma(linear_component: f32) f32 {
+    if (linear_component > 0) {
+        return @sqrt(linear_component);
+    }
+    return 0;
 }
