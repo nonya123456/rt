@@ -54,6 +54,7 @@ pub fn main(init: std.process.Init) !void {
 
     const aspect_ratio = 16.0 / 9.0;
     const image_width: i32 = 400;
-    const camera: Camera = .init(rng, aspect_ratio, image_width, .splat(0), 100, 50);
-    try camera.render(writer, world_hittable);
+    const camera: Camera = .init(aspect_ratio, image_width, .splat(0), 100, 50);
+
+    try camera.render(rng, writer, world_hittable);
 }

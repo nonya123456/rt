@@ -7,8 +7,6 @@ const Vec3 = @import("Vec3.zig");
 
 const Camera = @This();
 
-rng: std.Random,
-
 image_width: i32,
 image_height: i32,
 center: Vec3,
@@ -19,7 +17,6 @@ samples_per_pixel: i32,
 max_depth: i32,
 
 pub fn init(
-    rng: std.Random,
     aspect_ratio: f32,
     image_width: i32,
     center: Vec3,
@@ -45,7 +42,6 @@ pub fn init(
     const pixel00_loc = viewport_upper_left.add(Vec3.splat(0.5).mul(pixel_delta_u.add(pixel_delta_v)));
 
     return .{
-        .rng = rng,
         .image_width = image_width,
         .image_height = image_height,
         .center = center,
@@ -57,7 +53,7 @@ pub fn init(
     };
 }
 
-pub fn render(self: Camera, writer: *std.Io.Writer, h: Hittable) !void {
+pub fn render(self: Camera, rng: std.Random, writer: *std.Io.Writer, h: Hittable) !void {
     const pixel_samples_scale = 1.0 / @as(f32, @floatFromInt(self.samples_per_pixel));
 
     try writer.writeAll("P3\n");
@@ -72,8 +68,8 @@ pub fn render(self: Camera, writer: *std.Io.Writer, h: Hittable) !void {
             var pixel_color: Vec3 = .splat(0);
             var sample: i32 = 0;
             while (sample < self.samples_per_pixel) : (sample += 1) {
-                const r: Ray = self.getRay(i, j);
-                pixel_color = pixel_color.add(rayColor(self.rng, r, h, self.max_depth));
+                const r: Ray = self.getRay(rng, i, j);
+                pixel_color = pixel_color.add(rayColor(rng, r, h, self.max_depth));
             }
             try writeColor(writer, pixel_color.mul(.splat(pixel_samples_scale)));
         }
@@ -83,10 +79,10 @@ pub fn render(self: Camera, writer: *std.Io.Writer, h: Hittable) !void {
     std.debug.print("Done\n", .{});
 }
 
-fn getRay(self: Camera, i: i32, j: i32) Ray {
+fn getRay(self: Camera, rng: std.Random, i: i32, j: i32) Ray {
     const i_float: f32 = @floatFromInt(i);
     const j_float: f32 = @floatFromInt(j);
-    const offset = self.sampleSquare();
+    const offset = sampleSquare(rng);
     const pixel_sample = self.pixel00_loc
         .add(self.pixel_delta_u.mul(.splat(i_float + offset.data[0])))
         .add(self.pixel_delta_v.mul(.splat(j_float + offset.data[1])));
@@ -95,8 +91,8 @@ fn getRay(self: Camera, i: i32, j: i32) Ray {
     return .{ .origin = ray_origin, .dir = ray_direction };
 }
 
-fn sampleSquare(self: Camera) Vec3 {
-    return .init(.{ self.rng.float(f32) - 0.5, self.rng.float(f32) - 0.5, 0 });
+fn sampleSquare(rng: std.Random) Vec3 {
+    return .init(.{ rng.float(f32) - 0.5, rng.float(f32) - 0.5, 0 });
 }
 
 fn rayColor(rng: std.Random, r: Ray, h: Hittable, depth: i32) Vec3 {
