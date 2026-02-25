@@ -3,6 +3,7 @@ const HitRecord = Hittable.HitRecord;
 const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
+const Material = @import("Material.zig");
 
 const Sphere = @This();
 
