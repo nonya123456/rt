@@ -22,6 +22,10 @@ vup: Vec3,
 u: Vec3,
 v: Vec3,
 w: Vec3,
+defocus_angle: f32,
+focus_dist: f32,
+defocus_disk_u: Vec3,
+defocus_disk_v: Vec3,
 
 pub fn init(
     aspect_ratio: f32,
@@ -32,13 +36,14 @@ pub fn init(
     look_from: Vec3,
     look_at: Vec3,
     vup: Vec3,
+    defocus_angle: f32,
+    focus_dist: f32,
 ) Camera {
     const image_height: i32 = @intFromFloat(@as(f32, @floatFromInt(image_width)) / aspect_ratio);
     const center = look_from;
-    const focal_length = look_from.sub(look_at).length();
     const theta = std.math.degreesToRadians(vfov);
     const h = @tan(theta / 2.0);
-    const viewport_height = 2.0 * h * focal_length;
+    const viewport_height = 2.0 * h * focus_dist;
     const viewport_width = viewport_height * @as(f32, @floatFromInt(image_width)) / @as(f32, @floatFromInt(image_height));
 
     const w = look_from.sub(look_at).normalized();
@@ -52,11 +57,15 @@ pub fn init(
     const pixel_delta_v = viewport_v.div(.splatInt(image_height));
 
     const viewport_upper_left = center
-        .sub(w.mul(.splat(focal_length)))
+        .sub(w.mul(.splat(focus_dist)))
         .sub(viewport_u.div(.splat(2.0)))
         .sub(viewport_v.div(.splat(2.0)));
 
     const pixel00_loc = viewport_upper_left.add(Vec3.splat(0.5).mul(pixel_delta_u.add(pixel_delta_v)));
+
+    const defocus_radius = focus_dist * @tan(std.math.degreesToRadians(defocus_angle / 2.0));
+    const defocus_disk_u = u.mul(.splat(defocus_radius));
+    const defocus_disk_v = v.mul(.splat(defocus_radius));
 
     return .{
         .image_width = image_width,
@@ -74,6 +83,10 @@ pub fn init(
         .u = u,
         .v = v,
         .w = w,
+        .defocus_angle = defocus_angle,
+        .focus_dist = focus_dist,
+        .defocus_disk_u = defocus_disk_u,
+        .defocus_disk_v = defocus_disk_v,
     };
 }
 
@@ -110,8 +123,8 @@ fn getRay(self: Camera, rng: std.Random, i: i32, j: i32) Ray {
     const pixel_sample = self.pixel00_loc
         .add(self.pixel_delta_u.mul(.splat(i_float + offset.data[0])))
         .add(self.pixel_delta_v.mul(.splat(j_float + offset.data[1])));
-    const ray_origin = self.center;
-    const ray_direction = pixel_sample.sub(self.center).normalized();
+    const ray_origin = if (self.defocus_angle <= 0) self.center else self.defocusDiskSample(rng);
+    const ray_direction = pixel_sample.sub(ray_origin).normalized();
     return .{ .origin = ray_origin, .dir = ray_direction };
 }
 
@@ -154,4 +167,11 @@ fn linearToGamma(linear_component: f32) f32 {
         return @sqrt(linear_component);
     }
     return 0;
+}
+
+fn defocusDiskSample(self: Camera, rng: std.Random) Vec3 {
+    const p: Vec3 = .randomInUnitDisk(rng);
+    return self.center
+        .add(self.defocus_disk_u.mul(.splat(p.data[0])))
+        .add(self.defocus_disk_v.mul(.splat(p.data[1])));
 }

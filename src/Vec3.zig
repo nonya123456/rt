@@ -34,6 +34,19 @@ pub fn randomUnit(rng: std.Random) Vec3 {
     }
 }
 
+pub fn randomInUnitDisk(rng: std.Random) Vec3 {
+    while (true) {
+        const p: Vec3 = .init(.{
+            rng.float(f32) * 2.0 - 1.0,
+            rng.float(f32) * 2.0 - 1.0,
+            0,
+        });
+        if (p.length_squared() < 1) {
+            return p;
+        }
+    }
+}
+
 pub fn randomOnHemisphere(rng: std.Random, normal: Vec3) Vec3 {
     const on_unit_sphere: Vec3 = .randomUnit(rng);
     if (on_unit_sphere.dot(normal) > 0) {

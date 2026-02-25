@@ -72,6 +72,8 @@ pub fn main(init: std.process.Init) !void {
         .init(.{ -2, 2, 1 }),
         .init(.{ 0, 0, -1 }),
         .init(.{ 0, 1, 0 }),
+        10.0,
+        3.4,
     );
 
     try camera.render(rng, writer, world_hittable);
