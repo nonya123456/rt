@@ -104,7 +104,7 @@ fn rayColor(rng: std.Random, r: Ray, h: Hittable, depth: i32) Vec3 {
         return .splat(0);
     }
 
-    const rec = h.hit(r, .{ .min = 0, .max = std.math.floatMax(f32) }) orelse {
+    const rec = h.hit(r, .{ .min = 0.001, .max = std.math.floatMax(f32) }) orelse {
         const unit_direction = r.dir.normalized();
         const a = 0.5 * (unit_direction.data[1] + 1.0);
         return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
