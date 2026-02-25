@@ -8,9 +8,11 @@ const Vec3 = @import("Vec3.zig");
 
 const Lambertian = @This();
 
-rng: std.Random,
-
 albedo: Vec3,
+
+pub fn init(albedo: Vec3) Lambertian {
+    return .{ .albedo = albedo };
+}
 
 pub fn material(self: *Lambertian) Material {
     return .{
@@ -19,12 +21,12 @@ pub fn material(self: *Lambertian) Material {
     };
 }
 
-fn scatterOpaque(ptr: *anyopaque, r_in: Ray, rec: HitRecord) ?ScatterResult {
+fn scatterOpaque(ptr: *anyopaque, rng: std.Random, r_in: Ray, rec: HitRecord) ?ScatterResult {
     _ = r_in;
 
     const self: *Lambertian = @ptrCast(@alignCast(ptr));
 
-    var dir: Vec3 = rec.normal.add(.randomUnit(self.rng));
+    var dir: Vec3 = rec.normal.add(.randomUnit(rng));
     if (dir.nearZero()) {
         dir = rec.normal;
     }

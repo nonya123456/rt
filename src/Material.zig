@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const HitRecord = @import("Hittable.zig").HitRecord;
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
@@ -10,8 +12,8 @@ pub const ScatterResult = struct {
 };
 
 ptr: *anyopaque,
-scatterOpaque: *const fn (ptr: *anyopaque, r_in: Ray, rec: HitRecord) ?ScatterResult,
+scatterOpaque: *const fn (ptr: *anyopaque, rng: std.Random, r_in: Ray, rec: HitRecord) ?ScatterResult,
 
-pub fn scatter(self: Material, r_in: Ray, rec: HitRecord) ?ScatterResult {
-    return self.scatterOpaque(self.ptr, r_in, rec);
+pub fn scatter(self: Material, rng: std.Random, r_in: Ray, rec: HitRecord) ?ScatterResult {
+    return self.scatterOpaque(self.ptr, rng, r_in, rec);
 }

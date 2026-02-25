@@ -7,27 +7,10 @@ const Metal = @import("Metal.zig");
 const Sphere = @import("Sphere.zig");
 
 pub fn main(init: std.process.Init) !void {
-    var prng: std.Random.DefaultPrng = .init(0);
-    const rng = prng.random();
-
-    var material_ground: Lambertian = .{
-        .rng = rng,
-        .albedo = .init(.{ 0.8, 0.8, 0 }),
-    };
-    var material_center: Lambertian = .{
-        .rng = rng,
-        .albedo = .init(.{ 0.1, 0.2, 0.5 }),
-    };
-    var material_left: Metal = .{
-        .rng = rng,
-        .albedo = .init(.{ 0.8, 0.8, 0.8 }),
-        .fuzz = 0.3,
-    };
-    var material_right: Metal = .{
-        .rng = rng,
-        .albedo = .init(.{ 0.8, 0.6, 0.2 }),
-        .fuzz = 1,
-    };
+    var material_ground: Lambertian = .init(.init(.{ 0.8, 0.8, 0 }));
+    var material_center: Lambertian = .init(.init(.{ 0.1, 0.2, 0.5 }));
+    var material_left: Metal = .init(.init(.{ 0.8, 0.8, 0.8 }), 0.3);
+    var material_right: Metal = .init(.init(.{ 0.8, 0.6, 0.2 }), 1);
 
     var world: HittableList = .init();
 
@@ -65,6 +48,9 @@ pub fn main(init: std.process.Init) !void {
     var file = try std.Io.Dir.cwd().createFile(init.io, "./img.ppm", .{});
     var file_writer = file.writer(init.io, &buf);
     const writer = &file_writer.interface;
+
+    var prng: std.Random.DefaultPrng = .init(0);
+    const rng = prng.random();
 
     const aspect_ratio = 16.0 / 9.0;
     const image_width: i32 = 400;
