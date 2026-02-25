@@ -24,8 +24,6 @@ pub fn material(self: *Dialectric) Material {
 }
 
 fn scatterOpaque(ptr: *anyopaque, rng: std.Random, r_in: Ray, rec: HitRecord) ?ScatterResult {
-    _ = rng;
-
     const self: *Dialectric = @ptrCast(@alignCast(ptr));
     const attenuation: Vec3 = .init(.{ 1, 1, 1 });
     const ri = if (rec.front_face) (1.0 / self.refraction_index) else self.refraction_index;
@@ -33,8 +31,10 @@ fn scatterOpaque(ptr: *anyopaque, rng: std.Random, r_in: Ray, rec: HitRecord) ?S
 
     const cos_theta = @min(unit_direction.neg().dot(rec.normal), 1.0);
     const sin_theta = @sqrt(1.0 - cos_theta * cos_theta);
+    const cannot_refract = ri * sin_theta > 1.0;
+    const random_float = rng.float(f32);
     var direction: Vec3 = undefined;
-    if (ri * sin_theta > 1.0) {
+    if (cannot_refract or reflectance(cos_theta, self.refraction_index) > random_float) {
         direction = unit_direction.reflect(rec.normal);
     } else {
         direction = unit_direction.refract(rec.normal, ri);
@@ -44,4 +44,10 @@ fn scatterOpaque(ptr: *anyopaque, rng: std.Random, r_in: Ray, rec: HitRecord) ?S
         .attenuation = attenuation,
         .scattered = scattered,
     };
+}
+
+fn reflectance(cosine: f32, refraction_index: f32) f32 {
+    var r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * std.math.pow(f32, 1.0 - cosine, 5);
 }
