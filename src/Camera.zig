@@ -70,7 +70,7 @@ pub fn render(self: Camera, writer: *std.Io.Writer, h: Hittable) !void {
             var sample: i32 = 0;
             while (sample < self.samples_per_pixel) : (sample += 1) {
                 const r: Ray = self.getRay(i, j);
-                pixel_color = pixel_color.add(rayColor(r, h));
+                pixel_color = pixel_color.add(rayColor(self.rng, r, h));
             }
             try writeColor(writer, pixel_color.mul(.splat(pixel_samples_scale)));
         }
@@ -96,13 +96,15 @@ fn sampleSquare(self: Camera) Vec3 {
     return .init(.{ self.rng.float(f32) - 0.5, self.rng.float(f32) - 0.5, 0 });
 }
 
-fn rayColor(r: Ray, h: Hittable) Vec3 {
+fn rayColor(rng: std.Random, r: Ray, h: Hittable) Vec3 {
     const rec = h.hit(r, .{ .min = 0, .max = std.math.floatMax(f32) }) orelse {
         const unit_direction = r.dir.normalized();
         const a = 0.5 * (unit_direction.data[1] + 1.0);
         return Vec3.splat(1.0 - a).add(Vec3.splat(a).mul(.init(.{ 0.5, 0.7, 1.0 })));
     };
-    return rec.normal.add(.splat(1.0)).mul(.splat(0.5));
+
+    const dir: Vec3 = .randomOnHemisphere(rng, rec.normal);
+    return rayColor(rng, .{ .origin = rec.p, .dir = dir }, h).mul(.splat(0.5));
 }
 
 fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
