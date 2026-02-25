@@ -61,20 +61,18 @@ pub fn main(init: std.process.Init) !void {
     var prng: std.Random.DefaultPrng = .init(0);
     const rng = prng.random();
 
-    const aspect_ratio = 16.0 / 9.0;
-    const image_width: i32 = 400;
-    const camera: Camera = .init(
-        aspect_ratio,
-        image_width,
-        100,
-        50,
-        20,
-        .init(.{ -2, 2, 1 }),
-        .init(.{ 0, 0, -1 }),
-        .init(.{ 0, 1, 0 }),
-        10.0,
-        3.4,
-    );
+    const camera: Camera = .{
+        .aspect_ratio = 16.0 / 9.0,
+        .image_width = 400,
+        .samples_per_pixel = 100,
+        .max_depth = 50,
+        .vfov = 20,
+        .look_from = .init(.{ -2, 2, 1 }),
+        .look_at = .init(.{ 0, 0, -1 }),
+        .vup = .init(.{ 0, 1, 0 }),
+        .defocus_angle = 10.0,
+        .focus_dist = 3.4,
+    };
 
     try camera.render(rng, writer, world_hittable);
 }
