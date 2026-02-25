@@ -59,12 +59,11 @@ pub fn div(self: Vec3, v: Vec3) Vec3 {
 }
 
 pub fn neg(self: Vec3) Vec3 {
-    return Vec3.splat(0).sub(self);
+    return .{ .data = -self.data };
 }
 
 pub fn dot(self: Vec3, v: Vec3) f32 {
-    const m = self.data * v.data;
-    return m[0] + m[1] + m[2];
+    return @reduce(.Add, self.data * v.data);
 }
 
 pub fn length_squared(self: Vec3) f32 {
