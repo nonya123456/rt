@@ -29,7 +29,7 @@ pub fn randomUnit(rng: std.Random) Vec3 {
         const p: Vec3 = .random(rng, -1, 1);
         const lensq = p.length_squared();
         if (1e-160 < lensq and lensq < 1) {
-            return p.div(.splat(lensq));
+            return p.div(.splat(@sqrt(lensq)));
         }
     }
 }

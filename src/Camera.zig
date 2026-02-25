@@ -16,6 +16,7 @@ pixel00_loc: Vec3,
 pixel_delta_u: Vec3,
 pixel_delta_v: Vec3,
 samples_per_pixel: i32,
+max_depth: i32,
 
 pub fn init(
     rng: std.Random,
@@ -23,6 +24,7 @@ pub fn init(
     image_width: i32,
     center: Vec3,
     samples_per_pixel: i32,
+    max_depth: i32,
 ) Camera {
     const image_height: i32 = @intFromFloat(@as(f32, @floatFromInt(image_width)) / aspect_ratio);
     const focal_length = 1.0;
@@ -51,6 +53,7 @@ pub fn init(
         .pixel_delta_u = pixel_delta_u,
         .pixel_delta_v = pixel_delta_v,
         .samples_per_pixel = samples_per_pixel,
+        .max_depth = max_depth,
     };
 }
 
@@ -70,7 +73,7 @@ pub fn render(self: Camera, writer: *std.Io.Writer, h: Hittable) !void {
             var sample: i32 = 0;
             while (sample < self.samples_per_pixel) : (sample += 1) {
                 const r: Ray = self.getRay(i, j);
-                pixel_color = pixel_color.add(rayColor(self.rng, r, h));
+                pixel_color = pixel_color.add(rayColor(self.rng, r, h, self.max_depth));
             }
             try writeColor(writer, pixel_color.mul(.splat(pixel_samples_scale)));
         }
@@ -96,7 +99,11 @@ fn sampleSquare(self: Camera) Vec3 {
     return .init(.{ self.rng.float(f32) - 0.5, self.rng.float(f32) - 0.5, 0 });
 }
 
-fn rayColor(rng: std.Random, r: Ray, h: Hittable) Vec3 {
+fn rayColor(rng: std.Random, r: Ray, h: Hittable, depth: i32) Vec3 {
+    if (depth <= 0) {
+        return .splat(0);
+    }
+
     const rec = h.hit(r, .{ .min = 0, .max = std.math.floatMax(f32) }) orelse {
         const unit_direction = r.dir.normalized();
         const a = 0.5 * (unit_direction.data[1] + 1.0);
@@ -104,7 +111,8 @@ fn rayColor(rng: std.Random, r: Ray, h: Hittable) Vec3 {
     };
 
     const dir: Vec3 = .randomOnHemisphere(rng, rec.normal);
-    return rayColor(rng, .{ .origin = rec.p, .dir = dir }, h).mul(.splat(0.5));
+    const new_ray: Ray = .{ .origin = rec.p, .dir = dir };
+    return rayColor(rng, new_ray, h, depth - 1).mul(.splat(0.5));
 }
 
 fn writeColor(writer: *std.Io.Writer, color: Vec3) !void {
