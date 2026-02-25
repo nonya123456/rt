@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const Camera = @import("Camera.zig");
+const Dialectric = @import("Dialectric.zig");
 const HittableList = @import("HittableList.zig");
 const Lambertian = @import("Lambertian.zig");
 const Metal = @import("Metal.zig");
@@ -9,7 +10,7 @@ const Sphere = @import("Sphere.zig");
 pub fn main(init: std.process.Init) !void {
     var material_ground: Lambertian = .init(.init(.{ 0.8, 0.8, 0 }));
     var material_center: Lambertian = .init(.init(.{ 0.1, 0.2, 0.5 }));
-    var material_left: Metal = .init(.init(.{ 0.8, 0.8, 0.8 }), 0.3);
+    var material_left: Dialectric = .init(1.5);
     var material_right: Metal = .init(.init(.{ 0.8, 0.6, 0.2 }), 1);
 
     var world: HittableList = .init();

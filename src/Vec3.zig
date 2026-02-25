@@ -87,3 +87,10 @@ pub fn nearZero(self: Vec3) bool {
 pub fn reflect(self: Vec3, n: Vec3) Vec3 {
     return self.sub(Vec3.splat(2.0).mul(.splat(self.dot(n))).mul(n));
 }
+
+pub fn refract(self: Vec3, n: Vec3, etai_over_etat: f32) Vec3 {
+    const cos_theta = @min(self.neg().dot(n), 1.0);
+    const r_out_perp = self.add(n.mul(.splat(cos_theta))).mul(.splat(etai_over_etat));
+    const r_out_parallel = n.mul(.splat(-@sqrt(@abs(1.0 - r_out_perp.length_squared()))));
+    return r_out_perp.add(r_out_parallel);
+}
