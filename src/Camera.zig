@@ -15,27 +15,44 @@ pixel_delta_u: Vec3,
 pixel_delta_v: Vec3,
 samples_per_pixel: i32,
 max_depth: i32,
+vfov: f32,
+look_from: Vec3,
+look_at: Vec3,
+vup: Vec3,
+u: Vec3,
+v: Vec3,
+w: Vec3,
 
 pub fn init(
     aspect_ratio: f32,
     image_width: i32,
-    center: Vec3,
     samples_per_pixel: i32,
     max_depth: i32,
+    vfov: f32,
+    look_from: Vec3,
+    look_at: Vec3,
+    vup: Vec3,
 ) Camera {
     const image_height: i32 = @intFromFloat(@as(f32, @floatFromInt(image_width)) / aspect_ratio);
-    const focal_length = 1.0;
-    const viewport_height = 2.0;
+    const center = look_from;
+    const focal_length = look_from.sub(look_at).length();
+    const theta = std.math.degreesToRadians(vfov);
+    const h = @tan(theta / 2.0);
+    const viewport_height = 2.0 * h * focal_length;
     const viewport_width = viewport_height * @as(f32, @floatFromInt(image_width)) / @as(f32, @floatFromInt(image_height));
 
-    const viewport_u: Vec3 = .init(.{ viewport_width, 0, 0 });
-    const viewport_v: Vec3 = .init(.{ 0, -viewport_height, 0 });
+    const w = look_from.sub(look_at).normalized();
+    const u = vup.cross(w);
+    const v = w.cross(u);
+
+    const viewport_u: Vec3 = u.mul(.splat(viewport_width));
+    const viewport_v: Vec3 = v.neg().mul(.splat(viewport_height));
 
     const pixel_delta_u = viewport_u.div(.splatInt(image_width));
     const pixel_delta_v = viewport_v.div(.splatInt(image_height));
 
     const viewport_upper_left = center
-        .sub(.init(.{ 0, 0, focal_length }))
+        .sub(w.mul(.splat(focal_length)))
         .sub(viewport_u.div(.splat(2.0)))
         .sub(viewport_v.div(.splat(2.0)));
 
@@ -50,6 +67,13 @@ pub fn init(
         .pixel_delta_v = pixel_delta_v,
         .samples_per_pixel = samples_per_pixel,
         .max_depth = max_depth,
+        .vfov = vfov,
+        .look_from = look_from,
+        .look_at = look_at,
+        .vup = vup,
+        .u = u,
+        .v = v,
+        .w = w,
     };
 }
 

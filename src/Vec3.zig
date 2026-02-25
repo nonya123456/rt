@@ -62,6 +62,14 @@ pub fn neg(self: Vec3) Vec3 {
     return .{ .data = -self.data };
 }
 
+pub fn cross(self: Vec3, v: Vec3) Vec3 {
+    return .{ .data = .{
+        self.data[1] * v.data[2] - self.data[2] * v.data[1],
+        self.data[2] * v.data[0] - self.data[0] * v.data[2],
+        self.data[0] * v.data[1] - self.data[1] * v.data[0],
+    } };
+}
+
 pub fn dot(self: Vec3, v: Vec3) f32 {
     return @reduce(.Add, self.data * v.data);
 }
