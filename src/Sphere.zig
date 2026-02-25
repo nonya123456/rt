@@ -1,5 +1,5 @@
-const HitRecord = @import("hittable.zig").HitRecord;
-const Hittable = @import("hittable.zig").Hittable;
+const Hittable = @import("Hittable.zig");
+const HitRecord = Hittable.HitRecord;
 const Interval = @import("Interval.zig");
 const Ray = @import("Ray.zig");
 const Vec3 = @import("Vec3.zig");
